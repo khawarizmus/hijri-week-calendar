@@ -47,6 +47,9 @@
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.4.4"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.0",
     "@antfu/ni": "^0.21.12",
