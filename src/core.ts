@@ -44,7 +44,7 @@ import { Temporal } from '@js-temporal/polyfill'
 *                The output can then be formatted into other string formats if needed.
 *
 ********************************************************/
-export function toHWCDate(year: number, month: number, day: number, { fromCal = 'islamic-umalqura' } = {}): [number, number, number] {
+export function toHWCDate(year: number, month: number, day: number,fromCal = 'islamic-umalqura'): [number, number, number] {
   const hijriDate = Temporal.PlainDate.from({ year, month, day, calendar: fromCal })
   const hwcWeekDay = (hijriDate.dayOfWeek + 2) % 7 || 7 // Hijri weekday: Sat is day 1 and Friday day 7
   const hwcMidDate = hijriDate.add({ days: 4 - hwcWeekDay }) // the middle date of the HWC week (on Tuesday)
