@@ -75,7 +75,7 @@ export function hwcToString(array: [number, number, number]) {
 * First get 3rd day before the year end (either 26th or 27th of month 12).
 * Then get the week number for that day using toHWCDate() being the last week of the HWC year.
 ********************************************************/
-export function totalHWCWeeks(y: number, { fromCal = 'islamic-umalqura' } = {}) {
+export function totalHWCWeeks(y: number, fromCal = 'islamic-umalqura') {
   const d = Temporal.PlainDate.from({ year: y, month: 12, day: 30, calendar: fromCal }).subtract({ days: 3 })
   return toHWCDate(y, 12, d.day)[1]
 }
