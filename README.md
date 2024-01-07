@@ -76,7 +76,35 @@ Given these rules, the following calendars are **not compatible** with this impl
 ### Installation
 
 ```bash
-npm install hijri-week-calendar
+pnpm add hijri-week-calendar
+```
+
+### Tests
+
+The tests on this repo are dependent on generating dates that the tests can run against. To generate the dates, run the following command
+
+```bash
+pnpm run data:generate
+```
+
+The script should prompt you to enter the start and end years for the generation. The default values are 1443 and 1444 respectively. The script will generate the data in the `data` folder (which is ignored by git) for the following calendars (in order): `islamic-umalqura`, `islamic-tbla`, `islamic-civil`
+
+To run the tests, run the following command
+
+```bash
+npm run test
+```
+
+To run the test with tier user interface, run the following command (this will open a browser window and generate a coverage report as well)
+
+```bash
+npm run test:ui
+```
+
+To generate the coverage report along with running the tests, run the following command
+
+```bash
+npm run test:coverage
 ```
 
 ## License
