@@ -68,7 +68,7 @@ export function toHWCDate(year: number, month: number, day: number, calendar: Su
 // fromHWCDate([1445]);         // week 1 day 1 assumed
 //
 export function fromHWCDate(hwcDate: HWCLike, calendar: SupportedHijriCalendars = 'islamic-umalqura') {
-  const [year, week, day] = validateHWC(hwcDate) // get validated HWC date
+  const [year, week, day] = validateHWC(hwcDate, calendar) // get validated HWC date
   let date = Temporal.PlainDate.from({ year, month: 1, day: 4, calendar }) // 4th Muharram (yyyy-01-04)
   date = date.add({ days: (week - 1) * 7 + day - ((date.dayOfWeek + 2) % 7 || 7) })
   return [date.year, date.month, date.day]

@@ -1,5 +1,10 @@
+import kleur from 'kleur'
+import ora from 'ora'
+import type { Ora } from 'ora'
+import { storage } from './store'
+
 // =======================================================
-export function validateHWCDate(hwcDatesArray: string[]) {
+export function validateDates(dates: number[][], spinner: Ora) {
   // Validate that the list of HWC Dates generated for a sequence
   // of Hijri Dates is correct in accordance with the following rules:
   //
@@ -33,202 +38,239 @@ export function validateHWCDate(hwcDatesArray: string[]) {
   // 21. A leap Hijri year that starts on Wed or Thu (days 5 or 6) must have 50 weeks
   //     in the corresponding Hijri-Week Year.
 
-  let [thisYear, thisWeek, thisDay] = decodeHWCDate(hwcDatesArray[1]) // first hwc date in list
-  let [thisHYear, thisHMonth, thisHDay] = decodeHijriDate(hwcDatesArray[0]) // first Hijri date in list
+  let [thisHYear, thisHMonth, thisHDay, thisYearOfWeek, thisWeekOfYear, thisDayOfWeek] = dates[0] // grab first Hijri date and first HWC date in the list
+  // spinner.clear()
+  // spinner.text = `Validating dates for year ${kleur.yellow(`AH ${thisHYear}`)}\n`
+  // spinner.render()
   let error = false // error tracker
   // Check The weekday of the Hijri year Start Date and the Total HWC Weeks match
-  error = checkStartDate(hwcDatesArray, thisHYear, thisHMonth, thisHDay, thisYear, thisWeek, thisDay)
+  error = checkStartDate(dates, thisHYear, thisHMonth, thisHDay, thisYearOfWeek, thisWeekOfYear, thisDayOfWeek, spinner)
 
-  let daysCount = thisDay
+  let daysCount = thisDayOfWeek
   let weekArray = [] // holds week numbers for the weekdays 1-7
   const allEqual = (list: number[]) => list.every(i => i === list[0])
-  const listSize = hwcDatesArray.length
+  const listSize = dates.length
 
   //
   // ========= Start Looping thru Dates' Array =======
   //
-  for (let i = 2; i < listSize; i += 2) {
-    const hDate = hwcDatesArray[i] // get an Hijri date from array
-    const hwcDate = hwcDatesArray[i + 1] // get an HWC date from array
+  for (let i = 1; i < listSize; i++) {
+    const [nextHYear, nextHMonth, nextHDay, nextYearOfWeek, nextWeekOfYear, nextDayOfWeek] = dates[i] // get next Hijri date and next HWC date in the list
 
-    const [nextYear, nextWeek, nextDay] = decodeHWCDate(hwcDate) // decode HWC Date into y, w, d
-    const [nextHYear, nextHMonth, nextHDay] = decodeHijriDate(hDate) // decode Hijri Date into y, w, d
-
-    if (nextDay > 7 || nextDay < 1) { // weekdays from 1 to 7
-      console.log(`❌ Failed. Incorrect weekday in year ${nextYear}, week ${nextWeek}. Weekday ${nextDay} invalid`)
+    if (nextDayOfWeek > 7 || nextDayOfWeek < 1) { // weekdays from 1 to 7
+      spinner.fail(`Incorrect weekday in year ${nextYearOfWeek}, week ${nextWeekOfYear}. Weekday ${nextDayOfWeek} invalid`)
       error = true
     }
-    if (nextWeek > 51 || nextWeek < 1) { // weeks from 1 to 50/51
-      console.log(`❌ Failed. Incorrect Week in year ${nextYear}. Week No. ${nextWeek} invalid`)
+    if (nextWeekOfYear > 51 || nextWeekOfYear < 1) { // weeks from 1 to 50/51
+      spinner.fail(`Incorrect Week in year ${nextYearOfWeek}. Week No. ${nextWeekOfYear} invalid`)
       error = true
     }
     // ----------- Validate at Change of Hijri Years --------
     if (nextHYear !== thisHYear) { // a new Hijri year has started
+      // spinner.clear()
+      // spinner.text = `Validating dates for year ${kleur.yellow(`AH ${nextHYear}`)}\n`
+      // spinner.render()
       // Check The weekday of the Hijri year Start Date and the Total HWC Weeks match
-      error = checkStartDate(hwcDatesArray, nextHYear, nextHMonth, nextHDay, nextYear, nextWeek, nextDay)
+      error = checkStartDate(dates, nextHYear, nextHMonth, nextHDay, nextYearOfWeek, nextWeekOfYear, nextDayOfWeek, spinner)
     }
     // ----------- Validate at Change of HWC Years --------
-    if (nextYear !== thisYear) { // a new HWC year has started
-      if ((nextYear - thisYear) !== 1) { // year not in sequence
-        console.log(`❌ Failed. Year not in sequence..${nextYear} after ${thisYear}`)
+    if (nextYearOfWeek !== thisYearOfWeek) { // a new HWC year has started
+      if ((nextYearOfWeek - thisYearOfWeek) !== 1) { // year not in sequence
+        spinner.fail(`Year not in sequence..${nextYearOfWeek} after ${thisYearOfWeek}`)
         error = true
       }
-      if (nextWeek !== 1) { // next week must be 1
-        console.log(`❌ Failed. Year ${nextYear} started with non-Week 01! Year started with week number ${nextWeek}`)
+      if (nextWeekOfYear !== 1) { // next week must be 1
+        spinner.fail(`Year ${nextYearOfWeek} started with non-Week 01! Year started with week number ${nextWeekOfYear}`)
         error = true
       }
-      if (!(thisWeek === 50 || thisWeek === 51)) { // previous week for ending HWC year must be 50 or 51
-        console.log(`❌ Failed. Year ${thisYear} ended with non-Week 50/51! Year ended with week number ${thisWeek}`)
+      if (!(thisWeekOfYear === 50 || thisWeekOfYear === 51)) { // previous week for ending HWC year must be 50 or 51
+        spinner.fail(`Year ${thisYearOfWeek} ended with non-Week 50/51! Year ended with week number ${thisWeekOfYear}`)
         error = true
       }
-      if (nextDay !== 1) { // Start HWC year's weekday must be 1
-        console.log(`❌ Failed. Year ${nextYear} started with non-weekday 1! Year started with weekday ${nextDay}`)
+      if (nextDayOfWeek !== 1) { // Start HWC year's weekday must be 1
+        spinner.fail(`Year ${nextYearOfWeek} started with non-weekday 1! Year started with weekday ${nextDayOfWeek}`)
         error = true
       }
-      if (thisDay !== 7) { // Ending HWC year's weekday must end with 7
-        console.log(`❌ Failed. Year ${thisYear} ended with non-weekday 7! Year ended with weekday ${thisDay}`)
+      if (thisDayOfWeek !== 7) { // Ending HWC year's weekday must end with 7
+        spinner.fail(`Year ${thisYearOfWeek} ended with non-weekday 7! Year ended with weekday ${thisDayOfWeek}`)
         error = true
       }
       // with a new HWC year check that Week 01 has 4th Muharram
-      if (nextWeek === 1) {
+      if (nextWeekOfYear === 1) {
         let muharram4 = false
-        for (let m = 0; m < 13; m += 2) {
-          if ((i + m) >= listSize || (hwcDatesArray[i + m].slice(-4) === '0104')) {
+        for (let m = 0; m < 13; m++) {
+          //
+          if ((i + m) >= listSize || (dates[i + m][1] === 1 && dates[i + m][2] === 4)) {
             muharram4 = true
             break
           }
         }
         if (!muharram4) {
-          console.log(`❌ Failed. 4th Muharram for year ${nextYear} does not fall in Week 01`)
+          spinner.fail(`4th Muharram for year ${nextYearOfWeek} does not fall in Week 01`)
           error = true
         }
       }
     }
 
     // ----------- Validate at Change of HWC Weeks --------
-    if (nextWeek !== thisWeek) { // a new week has started
-      if (thisWeek === 51 && nextWeek !== 1) {
-        console.log(`❌ Failed. Week 51 is not followed by Week 01 in year ${nextYear}`)
+    if (nextWeekOfYear !== thisWeekOfYear) { // a new week has started
+      if (thisWeekOfYear === 51 && nextWeekOfYear !== 1) {
+        spinner.fail(`Week 51 is not followed by Week 01 in year ${nextYearOfWeek}`)
         error = true
       }
-      if (nextWeek === 1) { // if next week is Week 01
-        if (!(thisWeek === 50 || thisWeek === 51)) { // then previous week must be 50 or 51
-          console.log(`❌ Failed. Week not in sequence in year ${nextYear}. Week 01 after Week ${thisWeek}`)
+      if (nextWeekOfYear === 1) { // if next week is Week 01
+        if (!(thisWeekOfYear === 50 || thisWeekOfYear === 51)) { // then previous week must be 50 or 51
+          spinner.fail(`Week not in sequence in year ${nextYearOfWeek}. Week 01 after Week ${thisWeekOfYear}`)
           error = true
         }
       }
-      else if ((nextWeek - thisWeek) !== 1) { // weeks must be in sequence
-        console.log(`❌ Failed. Week not in sequence in year ${nextYear}. Week ${nextWeek} after Week ${thisWeek}`)
+      else if ((nextWeekOfYear - thisWeekOfYear) !== 1) { // weeks must be in sequence
+        spinner.fail(`Week not in sequence in year ${nextYearOfWeek}. Week ${nextWeekOfYear} after Week ${thisWeekOfYear}`)
         error = true
       }
     }
 
     // ----------- Validate at Change of HWC weekdays --------
-    if (nextDay !== thisDay) { // a new weekday has started
-      if (nextDay === 1) { // this week ended, must have 7 weekdays count so far
+    if (nextDayOfWeek !== thisDayOfWeek) { // a new weekday has started
+      if (nextDayOfWeek === 1) { // this week ended, must have 7 weekdays count so far
         weekArray = [] // flush the weeks array list
         if (daysCount !== 7) {
-          console.log(`❌ Failed. Week has less than 7 weekdays found in year ${nextYear}, week ${nextWeek}. At weekday ${nextDay}`)
+          spinner.fail(`Week has less than 7 weekdays found in year ${nextYearOfWeek}, week ${nextWeekOfYear}. At weekday ${nextDayOfWeek}`)
           error = true
         }
       }
 
-      if (nextDay === 1) { // if next weekday is weekday 1
-        if (thisDay !== 7) { // then previous weekday must be 7
-          console.log(`❌ Failed. Weekday not in sequence in year ${nextYear}. Weekday 1 after weekday ${thisDay}`)
+      if (nextDayOfWeek === 1) { // if next weekday is weekday 1
+        if (thisDayOfWeek !== 7) { // then previous weekday must be 7
+          spinner.fail(`Weekday not in sequence in year ${nextYearOfWeek}. Weekday 1 after weekday ${thisDayOfWeek}`)
           error = true
         }
       }
-      else if ((nextDay - thisDay) !== 1) { // weekdays must be in sequence
-        console.log(`❌ Failed. Weekday not in sequence in year ${nextYear}, week ${nextWeek}. Weekday ${nextDay} found after weekday ${thisDay}`)
+      else if ((nextDayOfWeek - thisDayOfWeek) !== 1) { // weekdays must be in sequence
+        spinner.fail(`Weekday not in sequence in year ${nextYearOfWeek}, week ${nextWeekOfYear}. Weekday ${nextDayOfWeek} found after weekday ${thisDayOfWeek}`)
         error = true
       }
       // weekdays are now Good
       daysCount++ // increment weekday count
-      weekArray.push(nextWeek) // remember the week no. for the weekday
+      weekArray.push(nextWeekOfYear) // remember the week no. for the weekday
 
       // check that all weekdays fall in the same Week
       if (!allEqual(weekArray)) {
-        console.log(`❌ Failed. Weekday with incorrect Week in year ${nextYear}, week ${nextWeek}, weekday ${nextDay}`)
+        spinner.fail(`Weekday with incorrect Week in year ${nextYearOfWeek}, week ${nextWeekOfYear}, weekday ${nextDayOfWeek}`)
         error = true
       }
 
     // else we have duplicate weekdays
     }
     else {
-      console.log(`❌ Failed. Weekday duplicate in year ${nextYear}, week ${nextWeek}, weekday ${nextDay}.`)
+      spinner.fail(`Weekday duplicate in year ${nextYearOfWeek}, week ${nextWeekOfYear}, weekday ${nextDayOfWeek}.`)
       error = true
     }
 
     // so far all is ok
-    thisYear = nextYear // update year number
+    thisYearOfWeek = nextYearOfWeek // update year number
     thisHYear = nextHYear // update year number
-    thisWeek = nextWeek // update week number
-    thisDay = nextDay // update weekday number
-    if (thisDay === 1)
+    thisWeekOfYear = nextWeekOfYear // update week number
+    thisDayOfWeek = nextDayOfWeek // update weekday number
+    if (thisDayOfWeek === 1)
       daysCount = 1 // reset weekday count to 1
   } // loop again for the next HWC date
-
   // all dates done.....
-  console.log(error ? '❌ Failed...' : '✅ All tests Passed...')
+  error ? spinner.fail(kleur.red('Generated dates are not valid.\n')) : spinner.succeed(kleur.green('Generated dates are valid.\n'))
 }
 
 // =======================================================
-function checkStartDate(hwcDatesArray: string[], thisHYear: number, thisHMonth: number, thisHDay: number, thisYear: number, thisWeek: number, thisDay: number) {
+function checkStartDate(dates: number[][], thisHYear: number, thisHMonth: number, thisHDay: number, thisYearOfWeek: number, thisWeekOFYear: number, thisDayOfWeek: number, spinner: Ora) {
   let error = false
-  let lastWeekPivot = '1227'
-  const hStartIndex = hwcDatesArray.indexOf(`${thisHYear}0101`)
-  let hEndIndex = hwcDatesArray.indexOf(`${thisHYear}1230`)
+  let lastWeekPivotDay = 27 // default to 12/27
+  const hStartIndex = dates.findIndex((row) => {
+    const [hYear, hMonth, hDay] = row
+    return (hYear === thisHYear) && (hMonth === 1) && (hDay === 1)
+  })
+  let hEndIndex = dates.findIndex((row) => {
+    const [hYear, hMonth, hDay] = row
+    return (hYear === thisHYear) && (hMonth === 12) && (hDay === 30)
+  })
   if (hEndIndex < 0) {
-    hEndIndex = hwcDatesArray.indexOf(`${thisHYear}1229`)
-    lastWeekPivot = '1226'
+    hEndIndex = dates.findIndex((row) => {
+      const [hYear, hMonth, hDay] = row
+      return (hYear === thisHYear) && (hMonth === 12) && (hDay === 29)
+    })
+    lastWeekPivotDay = 26 // change to 12/26
   }
 
-  const hYearSize = (hEndIndex - hStartIndex + 2) / 2 // get the length of Hijri Year
+  const hYearSize = (hEndIndex - hStartIndex + 1) // get the length of Hijri Year
 
   if ((hYearSize > 355) || (hYearSize < 354)) {
-    console.log(`❌ Failed. The Hijri year ${thisHYear} is ${hYearSize} days. That is not possible. This is an error or bug in the original Hijri Date and not in the HWC system.`)
+    spinner.fail(kleur.red(`The Hijri year ${thisHYear} is ${hYearSize} days. That is not possible. This is an error or bug in the original Hijri Date and not in the HWC system.`))
     error = true
   }
 
   const hLeap = (hYearSize === 355)
-  const indexPivotDay = hwcDatesArray.indexOf(thisHYear + lastWeekPivot) // get date on 26/12 or 27/12
-  const hwcPivot = hwcDatesArray[indexPivotDay + 1]
-  const [_xy, totalWeeks] = decodeHWCDate(hwcPivot) // get total week for corresponding HWC Year
+  const indexPivotDay = dates.findIndex((row) => {
+    const [hYear, hMonth, hDay] = row
+    return (hYear === thisHYear) && (hMonth === 12) && (hDay === lastWeekPivotDay)
+  }) // get date on 12/26 or 12/27
+  const hwcPivot = dates[indexPivotDay]
+  const [_y, _m, _d, _yow, totalWeeks, _dow] = hwcPivot // get total week for corresponding HWC Year
   const dayName = ['', 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
   if (hLeap) {
-    if ([1, 2, 3, 4, 7].includes(thisDay) && totalWeeks !== 51) {
-      console.log(`❌ Failed. The Hijri leap year ${thisHYear} starts on ${dayName[thisDay]} but the total HWC weeks is 50. ${thisHYear} must have a total of 51 weeks.`)
+    if ([1, 2, 3, 4, 7].includes(thisDayOfWeek) && totalWeeks !== 51) {
+      spinner.fail(kleur.red(`The Hijri leap year ${thisHYear} starts on ${dayName[thisDayOfWeek]} but the total HWC weeks is 50. ${thisHYear} must have a total of 51 weeks.`))
       error = true
     }
-    if ([5, 6].includes(thisDay) && totalWeeks !== 50) {
-      console.log(`❌ Failed. The Hijri leap year ${thisHYear} starts on ${dayName[thisDay]} but the total HWC weeks is 51. ${thisHYear} must have a total of 50 weeks.`)
+    if ([5, 6].includes(thisDayOfWeek) && totalWeeks !== 50) {
+      spinner.fail(kleur.red(`The Hijri leap year ${thisHYear} starts on ${dayName[thisDayOfWeek]} but the total HWC weeks is 51. ${thisHYear} must have a total of 50 weeks.`))
       error = true
     }
   }
   else { // common year
-    if ([1, 2, 3, 4].includes(thisDay) && totalWeeks !== 51) {
-      console.log(`❌ Failed. The Hijri common year ${thisHYear} starts on ${dayName[thisDay]} but the total HWC weeks is 50. ${thisHYear} must have a total of 51 weeks.`)
+    if ([1, 2, 3, 4].includes(thisDayOfWeek) && totalWeeks !== 51) {
+      spinner.fail(kleur.red(`The Hijri common year ${thisHYear} starts on ${dayName[thisDayOfWeek]} but the total HWC weeks is 50. ${thisHYear} must have a total of 51 weeks.`))
       error = true
     }
-    if ([5, 6, 7].includes(thisDay) && totalWeeks !== 50) {
-      console.log(`❌ Failed. The Hijri leap year ${thisHYear} starts on ${dayName[thisDay]} but the total HWC weeks is 51. ${thisHYear} must have a total of 50 weeks.`)
+    if ([5, 6, 7].includes(thisDayOfWeek) && totalWeeks !== 50) {
+      spinner.fail(kleur.red(`The Hijri leap year ${thisHYear} starts on ${dayName[thisDayOfWeek]} but the total HWC weeks is 51. ${thisHYear} must have a total of 50 weeks.`))
       error = true
     }
   }
   return error
 }
+
 // =======================================================
-function decodeHWCDate(hwcDate: string) {
-// convert the HWC Date to [year, week, day]
-  const hwcDateParts = hwcDate.split('W')
-  return [+hwcDateParts[0], +hwcDateParts[1].slice(0, 2), +hwcDateParts[1].slice(2, 3)]
-}
-// =======================================================
-function decodeHijriDate(hDate: string) {
-// convert the Hijri compact Date to [year, month, day]
-  const md = hDate.slice(-4)
-  const hy = hDate.slice(0, hDate.length - md.length)
-  return [+hy, +md.slice(0, 2), +md.slice(2, 4)]
+export async function dataValidator() {
+  const umalqura = await storage.getItem<number[][]>('dates:islamic-umalqura')
+  const civil = await storage.getItem<number[][]>('dates:islamic-civil')
+  const tbla = await storage.getItem<number[][]>('dates:islamic-tbla')
+
+  const umalquraSpinner = ora({
+    text: `Validating ${kleur.yellow('islamic-umalqura')} dates\n`,
+    spinner: 'clock',
+  })
+
+  const civilSpinner = ora({
+    text: `Validating ${kleur.yellow('islamic-civil')} dates\n`,
+    spinner: 'clock',
+  })
+
+  const tblaSpinner = ora({
+    text: `Validating ${kleur.yellow('islamic-tbla')} dates\n`,
+    spinner: 'clock',
+  })
+
+  if (!umalqura || !civil || !tbla)
+    throw new Error('Data is not generated')
+
+  // validating umalqura
+  umalquraSpinner.start()
+  validateDates(umalqura, umalquraSpinner)
+
+  // validating civil
+  civilSpinner.start()
+  validateDates(civil, civilSpinner)
+
+  // validating tbla
+  tblaSpinner.start()
+  validateDates(tbla, tblaSpinner)
 }

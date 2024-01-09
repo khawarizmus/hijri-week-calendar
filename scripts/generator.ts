@@ -1,44 +1,47 @@
+import process from 'node:process'
 import { Temporal } from '@js-temporal/polyfill'
 import ms from 'ms'
 import prettyBytes from 'pretty-bytes'
 import ora from 'ora'
-import type { Answers } from 'prompts'
 import prompts from 'prompts'
-import kluer from 'kleur'
+import kleur from 'kleur'
 import { toHWCDate } from '../src/core/core'
 import type { SupportedHijriCalendars } from '../src/types'
 import { storage } from './store'
+import { dataValidator } from './validator'
 
 // TODO: insert license header here
+
+// SIGINT handler
+process.on('SIGINT', () => {
+  console.log('Interrupt detected. Exiting the process...')
+  process.exit(0)
+})
 
 const START_YEAR = await storage.getItem<number>('START_YEAR')
 const END_YEAR = await storage.getItem<number>('END_YEAR')
 
-console.log(kluer.green('Hijri Week Calendar Data Generator\n'))
-console.log(kluer.yellow('------------------------------------\n'))
+console.log(kleur.green('Hijri Week Calendar Data Generator\n'))
+console.log(kleur.yellow('------------------------------------\n'))
 if (START_YEAR && END_YEAR)
-  console.log(kluer.green(`Previously generated data from year AH ${kluer.yellow(START_YEAR)} to AH ${kluer.yellow(END_YEAR)} is available.`))
+  console.log(kleur.green(`Previously generated data from year ${kleur.yellow('AH ' + `${START_YEAR}`)} to ${kleur.yellow('AH ' + `${END_YEAR}`)} is available.`))
 
 const useExisting = await prompts({
   type: (START_YEAR && END_YEAR) ? 'confirm' : null,
   initial: !((START_YEAR && END_YEAR)), // if data is undefined then useExisting is true
   name: 'value',
-  hint: kluer.yellow('Previously generated data will be overwritten.'),
+  hint: kleur.yellow('Previously generated data will be overwritten.'),
   message: 'Do You want to use the existing data?',
 })
 
-let doValidate: Answers<'value'> = {
-  value: false,
-}
+const doValidate = await prompts({
+  type: 'confirm',
+  initial: true,
+  name: 'value',
+  message: 'Do You want to validate the generated data?',
+})
 
 if (!useExisting.value) {
-  doValidate = await prompts({
-    type: 'confirm',
-    initial: true,
-    name: 'value',
-    message: 'Do You want to validate the generated data?',
-  })
-
   await prompts({
     type: 'number',
     initial: 1443,
@@ -81,9 +84,9 @@ if (!useExisting.value) {
 export async function dataGenerator() {
   if (useExisting.value) {
     // return existing data
-    const umalqura = await storage.getItem<any[]>('dates:islamic-umalqura')
-    const civil = await storage.getItem<any[]>('dates:islamic-civil')
-    const tbla = await storage.getItem<any[]>('dates:islamic-tbla')
+    const umalqura = await storage.getItem<number[][]>('dates:islamic-umalqura')
+    const civil = await storage.getItem<number[][]>('dates:islamic-civil')
+    const tbla = await storage.getItem<number[][]>('dates:islamic-tbla')
     const START_YEAR = await storage.getItem<number>('START_YEAR')
     const END_YEAR = await storage.getItem<number>('END_YEAR')
     return {
@@ -117,7 +120,7 @@ export async function dataGenerator() {
       const data = []
       for (let year = START_YEAR; year <= END_YEAR; year++) {
         spinner.clear()
-        spinner.text = `Generating dates for year ${kluer.yellow(`AH ${year}`)} for ${kluer.yellow(calendar)}\n`
+        spinner.text = `Generating dates for year ${kleur.yellow(`AH ${year}`)} for ${kleur.yellow(calendar)}\n`
         spinner.render()
         for (let month = 1; month <= 12; month++) {
           const daysInMonth = Temporal.PlainYearMonth.from({ year, month, calendar }).daysInMonth
@@ -143,12 +146,12 @@ export async function dataGenerator() {
     }
 
     const sizeInBytes = new Blob([JSON.stringify(umalqura)]).size + new Blob([JSON.stringify(civil)]).size + new Blob([JSON.stringify(tbla)]).size
-    spinner.info(`List size approx = ${kluer.yellow(prettyBytes(sizeInBytes))} bytes\n`)
+    spinner.info(`List size approx = ${kleur.yellow(prettyBytes(sizeInBytes))}\n`)
     // store data
     storage.setItem('START_YEAR', START_YEAR)
     storage.setItem('END_YEAR', END_YEAR)
     console.timeEnd('DataGenerator Execution Time') // End timing and log the duration
-    spinner.succeed(kluer.green(`Data generated successfully`))
+    spinner.succeed(kleur.green(`Data generated successfully`))
     return {
       umalqura,
       civil,
@@ -161,6 +164,7 @@ export async function dataGenerator() {
 
 await dataGenerator()
 
-if (doValidate) {
+if (doValidate.value) {
   // TODO: add validator
+  await dataValidator()
 }

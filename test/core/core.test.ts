@@ -75,6 +75,7 @@ describe('should generate valid Hijri dates back from Hijri Week Calendar dates'
       expect.soft(hijri[2]).toBe(d)
     }
   })
+
   it<PopulatedContext>('should work for Civil calendar', ({ civil }) => {
     const calendar = 'islamic-civil'
     for (let i = 0; i < civil.length; i++) {
@@ -87,6 +88,7 @@ describe('should generate valid Hijri dates back from Hijri Week Calendar dates'
       expect.soft(hijri[2]).toBe(d)
     }
   })
+
   it<PopulatedContext>('should work for Tabular calendar', ({ tbla }) => {
     const calendar = 'islamic-tbla'
     for (let i = 0; i < tbla.length; i++) {
@@ -97,6 +99,9 @@ describe('should generate valid Hijri dates back from Hijri Week Calendar dates'
       expect.soft(hijri[0]).toBe(y)
       expect.soft(hijri[1]).toBe(m)
       expect.soft(hijri[2]).toBe(d)
+      if (hijri[0] !== y || hijri[1] !== m || hijri[2] !== d)
+        // eslint-disable-next-line no-console
+        console.log(`Problematic on row: ${i} for hwcDate: ${hwcDate[0]}-W${hwcDate[1]}-${hwcDate[2]} Expected: ${y}-${m}-${d} Received: ${hijri[0]}-${hijri[1]}-${hijri[2]}`)
     }
   })
 })

@@ -2,7 +2,7 @@
 //       The following are the helper functions
 
 import { Temporal } from '@js-temporal/polyfill'
-import type { HWCLike } from '../types'
+import type { HWCLike, SupportedHijriCalendars } from '../types'
 import { toHWCDate } from './core'
 
 const isInRange = (num: number, min: number, max: number) => num >= min && num <= max
@@ -35,7 +35,7 @@ export function hijriDayOfWeek(dayOfWeek: number): number {
   *                weeks above max for the year are truncated to max
   *
   ********************************************************/
-export function validateHWC(hwcDate: HWCLike) {
+export function validateHWC(hwcDate: HWCLike, calendar: SupportedHijriCalendars = 'islamic-umalqura') {
   let yearOfWeek, weekOfYear, dayOfWeek
   if (typeof hwcDate === 'number')
     return [hwcDate, 1, 1] // assume year only provided
@@ -52,7 +52,7 @@ export function validateHWC(hwcDate: HWCLike) {
       throw new Error('Invalid HWC Date.')
   }
   else { throw new TypeError('Invalid HWC Date.') }
-  return hwcTruncate(yearOfWeek, weekOfYear, dayOfWeek) // truncate week and day if necessary
+  return hwcTruncate(yearOfWeek, weekOfYear, dayOfWeek, calendar) // truncate week and day if necessary
 }
 
 /********************************************************
@@ -64,9 +64,9 @@ export function validateHWC(hwcDate: HWCLike) {
     * First get 3rd day before the year end (either 26th or 27th of month 12).
     * Then get the week number for that day using toHWCDate() being the last week of the HWC year.
     ********************************************************/
-export function totalHWCWeeks(year: number, calendar = 'islamic-umalqura') {
+export function totalHWCWeeks(year: number, calendar: SupportedHijriCalendars = 'islamic-umalqura') {
   const date = Temporal.PlainDate.from({ year, month: 12, day: 30, calendar }).subtract({ days: 3 })
-  return toHWCDate(year, 12, date.day)[1]
+  return toHWCDate(year, 12, date.day, calendar)[1]
 }
 
 // ================================================
@@ -127,13 +127,13 @@ export function hwcToCompactString(HWCDate: [number, number, number] | number[])
 
 // ================================
 // truncates the week and day if necessary
-function hwcTruncate(yearOfWeek: number, weekOfYear: number, dayOfWeek: number) {
+function hwcTruncate(yearOfWeek: number, weekOfYear: number, dayOfWeek: number, calendar: SupportedHijriCalendars = 'islamic-umalqura') {
   weekOfYear = weekOfYear ?? 1 // if undefined then week = 1
   dayOfWeek = dayOfWeek ?? 1 // if undefined then day = 1
   dayOfWeek < 1 && (dayOfWeek = 1)
   dayOfWeek > 7 && (dayOfWeek = 7)
   weekOfYear < 1 && (weekOfYear = 1)
-  const totalWeeks = totalHWCWeeks(yearOfWeek) // get max weeks for HWC year
+  const totalWeeks = totalHWCWeeks(yearOfWeek, calendar) // get max weeks for HWC year
   if (weekOfYear > totalWeeks)
     weekOfYear = totalWeeks // week cannot be > total weeks, ==> truncate
   return [yearOfWeek, weekOfYear, dayOfWeek]

@@ -82,12 +82,12 @@ describe('calculations from Hijri to Hijri Week Calendar', () => {
     expect(totalHWCWeeks(1445)).toEqual(50)
     expect(totalHWCWeeks(1446)).toEqual(51)
 
-    expect(totalHWCWeeks(1444, 'islamic-civil')).toEqual(50)
+    expect(totalHWCWeeks(1444, 'islamic-civil')).toEqual(51)
     expect(totalHWCWeeks(1445, 'islamic-civil')).toEqual(50)
     expect(totalHWCWeeks(1446, 'islamic-civil')).toEqual(51)
 
     expect(totalHWCWeeks(1444, 'islamic-tbla')).toEqual(50)
-    expect(totalHWCWeeks(1445, 'islamic-tbla')).toEqual(50)
+    expect(totalHWCWeeks(1445, 'islamic-tbla')).toEqual(51)
     expect(totalHWCWeeks(1446, 'islamic-tbla')).toEqual(51)
   })
 
