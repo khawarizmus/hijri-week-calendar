@@ -3,6 +3,21 @@ import { hijriDayOfWeek as _hijriDayOfWeek, toHWCDate, totalHWCWeeks } from '..'
 import type { SupportedHijriCalendars } from '../types'
 import { HWCRepresentation } from '../core/representation'
 
+////////////////////////////////////////////////////////////////////////
+//                                                                    //
+//                Hijri-Week Calendar Tabular Islamic Calendar        //
+//                                                                    //
+//                   Custom Temporal Calendar                         //
+//                                                                    //
+////////////////////////////////////////////////////////////////////////
+
+/*
+* @inspired by : Mohsen Alyafei (https://github.com/MohsenAlyafei)
+* @author      : khawarizmus (https://github.com/khawarizmus)
+* @Licence     : MIT
+* @date        : 9 Jan 2024 (28-06-1445 AH) (HWC Date: 1445-W26-4) (Tabular Islamic Calendar)
+*/
+
 export class HWCTbla extends Temporal.Calendar {
   readonly id: string
   readonly superId: SupportedHijriCalendars
