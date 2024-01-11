@@ -6,7 +6,7 @@ import ora from 'ora'
 import prompts from 'prompts'
 import kleur from 'kleur'
 import { toHWCDate } from '../src/core/core'
-import type { SupportedHijriCalendars } from '../src/types'
+import type { SupportedHijriCalendars } from '../src/types/interfaces'
 import { storage } from './store'
 import { dataValidator } from './validator'
 
@@ -111,13 +111,13 @@ export async function dataGenerator() {
 
     console.time('DataGenerator Execution Time') // Start timing
     const calendars: SupportedHijriCalendars[] = ['islamic-umalqura', 'islamic-civil', 'islamic-tbla']
-    const umalqura = []
-    const civil = []
-    const tbla = []
+    const umalqura: number[][] = []
+    const civil: number[][] = []
+    const tbla: number[][] = []
 
     for (let i = 0; i < calendars.length; i++) {
       const calendar = calendars[i]
-      const data = []
+      const data: number[][] = []
       for (let year = START_YEAR; year <= END_YEAR; year++) {
         spinner.clear()
         spinner.text = `Generating dates for year ${kleur.yellow(`AH ${year}`)} for ${kleur.yellow(calendar)}\n`

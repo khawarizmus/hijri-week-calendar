@@ -6,7 +6,7 @@
 //                                                                    //
 ////////////////////////////////////////////////////////////////////////
 import { Temporal } from '@js-temporal/polyfill'
-import type { HWCLike, SupportedHijriCalendars } from '../types'
+import type { HWCLike, SupportedHijriCalendars } from '../types/interfaces'
 import { validateHWC } from './utils'
 
 /********************************************************

@@ -2,7 +2,7 @@
 //       The following are the helper functions
 
 import { Temporal } from '@js-temporal/polyfill'
-import type { HWCLike, SupportedHijriCalendars } from '../types'
+import type { HWCLike, SupportedHijriCalendars } from '../types/interfaces'
 import { toHWCDate } from './core'
 
 const isInRange = (num: number, min: number, max: number) => num >= min && num <= max

@@ -3,21 +3,44 @@
   "type": "module",
   "version": "0.0.0",
   "packageManager": "pnpm@8.12.1",
-  "description": "_description_",
-  "author": "Anthony Fu <anthonyfu117@hotmail.com>",
+  "description": "A Hijri Week Calendar is an implementation of the ISO 8601 equivalent for the Hijri calendar.",
+  "author": "khawarizmus (https://github.com/khawarizmus)",
   "license": "MIT",
-  "funding": "https://github.com/sponsors/antfu",
-  "homepage": "https://github.com/antfu/hijri-week-calendar#readme",
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://github.com/sponsors/khawarizmus"
+    },
+    {
+      "type": "individual",
+      "url": "https://github.com/sponsors/MohsenAlyafei"
+    }
+  ],
+  "homepage": "https://github.com/khawarizmus/hijri-week-calendar#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/antfu/hijri-week-calendar.git"
+    "url": "git+https://github.com/khawarizmus/hijri-week-calendar.git"
   },
-  "bugs": "https://github.com/antfu/hijri-week-calendar/issues",
-  "keywords": [],
+  "bugs": "https://github.com/khawarizmus/hijri-week-calendar/issues",
+  "keywords": [
+    "hijri",
+    "calendar",
+    "week",
+    "date",
+    "iso",
+    "iso8601",
+    "hijri-date",
+    "islamic",
+    "islamic-calendar",
+    "hijri-calendar",
+    "hijri-week",
+    "hijri-week-calendar",
+    "standard"
+  ],
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": ["./dist/index.d.ts", "./dist/Temporal.d.ts"],
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
@@ -29,7 +52,8 @@
     "*": {
       "*": [
         "./dist/*",
-        "./dist/index.d.ts"
+        "./dist/index.d.ts",
+        "./dist/Temporal.d.ts"
       ]
     }
   },
@@ -38,6 +62,7 @@
   ],
   "scripts": {
     "build": "unbuild",
+    "postbuild": "cp -r src/types/Temporal.d.ts dist",
     "dev": "unbuild --stub",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
@@ -55,9 +80,9 @@
     "@js-temporal/polyfill": "^0.4.4"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.6.0",
-    "@antfu/ni": "^0.21.12",
-    "@antfu/utils": "^0.7.7",
+    "@khawarizmus/eslint-config": "^2.6.0",
+    "@khawarizmus/ni": "^0.21.12",
+    "@khawarizmus/utils": "^0.7.7",
     "@types/ms": "^0.7.34",
     "@types/node": "^20.10.5",
     "@types/prompts": "^2.4.9",

@@ -1,6 +1,6 @@
 import { Temporal } from '@js-temporal/polyfill'
 import { hijriDayOfWeek as _hijriDayOfWeek, toHWCDate, totalHWCWeeks } from '..'
-import type { SupportedHijriCalendars } from '../types'
+import type { SupportedHijriCalendars } from '../types/interfaces'
 import { HWCRepresentation } from '../core/representation'
 
 ////////////////////////////////////////////////////////////////////////
@@ -29,17 +29,26 @@ export class HWCCivil extends Temporal.Calendar {
   }
 
   yearOfWeek(date: string | Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike): number {
-    const Hdate = Temporal.PlainDate.from(date)
+    const Hdate = Temporal.PlainDate.from(date).withCalendar(this.superId)
     return toHWCDate(Hdate.year, Hdate.month, Hdate.day, this.superId)[0]
   }
 
   weekOfYear(date: string | Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike): number {
-    const Hdate = Temporal.PlainDate.from(date)
+    const Hdate = Temporal.PlainDate.from(date).withCalendar(this.superId)
     return toHWCDate(Hdate.year, Hdate.month, Hdate.day, this.superId)[1]
   }
 
+  toJSON(): string {
+    return this.id
+  }
+
+  toString(): string {
+    return this.id
+  }
+
+  // custom accessors
   dayOfHWCDate(date: string | Temporal.PlainDate | Temporal.PlainDateTime | Temporal.PlainDateLike): number {
-    const Hdate = Temporal.PlainDate.from(date)
+    const Hdate = Temporal.PlainDate.from(date).withCalendar(this.superId)
     return toHWCDate(Hdate.year, Hdate.month, Hdate.day, this.superId)[2]
   }
 
@@ -56,19 +65,11 @@ export class HWCCivil extends Temporal.Calendar {
     return totalHWCWeeks(Hdate.year, this.superId)
   }
 
-  toJSON(): string {
-    return this.id
+  // overriding base calendar logic to use this calendar
+  dateFromFields(fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode & { day: number }, options?: Temporal.AssignmentOptions | undefined): Temporal.PlainDate {
+    const native = Temporal.PlainDate.from({ ...fields, calendar: 'islamic-civil' }, options)
+    return native.withCalendar(this)
   }
-
-  toString(): string {
-    return this.id
-  }
-
-  // TODO: override dateFromFields(), monthDayFromFields(), yearMonthFromFields(), and dateAdd() so that they return Temporal objects with the custom calendar and not the base calendar.
-
-  //   dateFromFields(fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode & { day: number }, options?: Temporal.AssignmentOptions | undefined): Temporal.PlainDate {
-  //     return Temporal.PlainDate.from({ ...fields, calendar: this }, options)
-  //   }
 
   yearMonthFromFields(fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode, options?: Temporal.AssignmentOptions): Temporal.PlainYearMonth {
     return Temporal.PlainYearMonth.from({ ...fields, calendar: this }, options)

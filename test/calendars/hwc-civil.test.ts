@@ -1,25 +1,25 @@
 import { Temporal } from '@js-temporal/polyfill'
 import { describe, expect, it } from 'vitest'
-import { HWCUmalqura } from '../../src/calendars/HWCUmulqura'
+import { HWCCivil } from '../../src/calendars/HWCCivil'
 
-describe('custom HWC Umulqura calendar should work', () => {
+describe('custom HWC Civil calendar should work', () => {
   it('should be instantiated without errors', () => {
     let customCalendar: Temporal.Calendar
-    expect(() => customCalendar = new HWCUmalqura()).not.toThrow()
+    expect(() => customCalendar = new HWCCivil()).not.toThrow()
     expect(() => Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })).not.toThrow()
   })
 
   it('should have the right calendarId', () => {
-    const HWCDate = Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: new HWCUmalqura() })
-    const HWCDateTime = Temporal.PlainDateTime.from({ year: 1444, month: 2, day: 3, calendar: new HWCUmalqura() })
-    const HWCZonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: new HWCUmalqura() })
-    expect(HWCDate.calendarId).toBe('hwc-islamic-umalqura')
-    expect(HWCDateTime.calendarId).toBe('hwc-islamic-umalqura')
-    expect(HWCZonedDate.calendarId).toBe('hwc-islamic-umalqura')
+    const HWCDate = Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: new HWCCivil() })
+    const HWCDateTime = Temporal.PlainDateTime.from({ year: 1444, month: 2, day: 3, calendar: new HWCCivil() })
+    const HWCZonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: new HWCCivil() })
+    expect(HWCDate.calendarId).toBe('hwc-islamic-civil')
+    expect(HWCDateTime.calendarId).toBe('hwc-islamic-civil')
+    expect(HWCZonedDate.calendarId).toBe('hwc-islamic-civil')
   })
 
   it('should return the correct year of week', () => {
-    const customCalendar = new HWCUmalqura()
+    const customCalendar = new HWCCivil()
     const HWCdate = Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCdateTime = Temporal.PlainDateTime.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCzonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: customCalendar })
@@ -30,7 +30,7 @@ describe('custom HWC Umulqura calendar should work', () => {
   })
 
   it('should return the correct week of year', () => {
-    const customCalendar = new HWCUmalqura()
+    const customCalendar = new HWCCivil()
     const HWCDate = Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCDateTime = Temporal.PlainDateTime.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCZonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: customCalendar })
@@ -41,18 +41,18 @@ describe('custom HWC Umulqura calendar should work', () => {
   })
 
   it('should return the correct day of HWC date', () => {
-    const customCalendar = new HWCUmalqura()
+    const customCalendar = new HWCCivil()
     const HWCDate = Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCDateTime = Temporal.PlainDateTime.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCZonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: customCalendar })
-    expect(customCalendar.dayOfHWCDate(HWCDate)).toBe(4)
-    expect(HWCDate.dayOfHWCDate).toBe(4)
-    expect(HWCDateTime.dayOfHWCDate).toBe(4)
-    expect(HWCZonedDate.dayOfHWCDate).toBe(4)
+    expect(customCalendar.dayOfHWCDate(HWCDate)).toBe(5)
+    expect(HWCDate.dayOfHWCDate).toBe(5)
+    expect(HWCDateTime.dayOfHWCDate).toBe(5)
+    expect(HWCZonedDate.dayOfHWCDate).toBe(5)
   })
 
   it('should return the correct weeks in year count', () => {
-    const customCalendar = new HWCUmalqura()
+    const customCalendar = new HWCCivil()
     const HWCDate = Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCDateTime = Temporal.PlainDateTime.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCZonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: customCalendar })
@@ -63,42 +63,42 @@ describe('custom HWC Umulqura calendar should work', () => {
   })
 
   it('should return the correct hijri day of week', () => {
-    const customCalendar = new HWCUmalqura()
+    const customCalendar = new HWCCivil()
     const HWCDate = Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCDateTime = Temporal.PlainDateTime.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCZonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: customCalendar })
-    expect(customCalendar.hijriDayOfWeek(HWCDate)).toBe(4)
-    expect(HWCDate.hijriDayOfWeek).toBe(4)
-    expect(HWCDateTime.hijriDayOfWeek).toBe(4)
-    expect(HWCZonedDate.hijriDayOfWeek).toBe(4)
+    expect(customCalendar.hijriDayOfWeek(HWCDate)).toBe(5)
+    expect(HWCDate.hijriDayOfWeek).toBe(5)
+    expect(HWCDateTime.hijriDayOfWeek).toBe(5)
+    expect(HWCZonedDate.hijriDayOfWeek).toBe(5)
   })
 
   it('should return the correct HWC representation', () => {
-    const customCalendar = new HWCUmalqura()
+    const customCalendar = new HWCCivil()
     const HWCDate = Temporal.PlainDate.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCDateTime = Temporal.PlainDateTime.from({ year: 1444, month: 2, day: 3, calendar: customCalendar })
     const HWCZonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: customCalendar })
     expect(customCalendar.HWCRepresentation(HWCDate)).toEqual({
-      calendar: 'islamic-umalqura',
-      dayOfWeek: 4,
+      calendar: 'islamic-civil',
+      dayOfWeek: 5,
       weekOfYear: 5,
       yearOfWeek: 1444,
     })
     expect(HWCDate.HWCRepresentation).toEqual({
-      calendar: 'islamic-umalqura',
-      dayOfWeek: 4,
+      calendar: 'islamic-civil',
+      dayOfWeek: 5,
       weekOfYear: 5,
       yearOfWeek: 1444,
     })
     expect(HWCDateTime.HWCRepresentation).toEqual({
-      calendar: 'islamic-umalqura',
-      dayOfWeek: 4,
+      calendar: 'islamic-civil',
+      dayOfWeek: 5,
       weekOfYear: 5,
       yearOfWeek: 1444,
     })
     expect(HWCZonedDate.HWCRepresentation).toEqual({
-      calendar: 'islamic-umalqura',
-      dayOfWeek: 4,
+      calendar: 'islamic-civil',
+      dayOfWeek: 5,
       weekOfYear: 5,
       yearOfWeek: 1444,
     })

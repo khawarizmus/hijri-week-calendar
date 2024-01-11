@@ -47,7 +47,7 @@ export function validateDates(dates: number[][], spinner: Ora) {
   error = checkStartDate(dates, thisHYear, thisHMonth, thisHDay, thisYearOfWeek, thisWeekOfYear, thisDayOfWeek, spinner)
 
   let daysCount = thisDayOfWeek
-  let weekArray = [] // holds week numbers for the weekdays 1-7
+  let weekArray: number[] = [] // holds week numbers for the weekdays 1-7
   const allEqual = (list: number[]) => list.every(i => i === list[0])
   const listSize = dates.length
 

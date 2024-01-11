@@ -7,8 +7,11 @@
     "resolveJsonModule": true,
     "strict": true,
     "strictNullChecks": true,
+    "declaration": true,
+    "declarationDir": "src/types",
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*"]
 }

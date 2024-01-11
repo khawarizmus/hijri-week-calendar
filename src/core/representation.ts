@@ -1,5 +1,5 @@
 import { hwcToString } from '..'
-import type { SupportedHijriCalendars } from '../types'
+import type { SupportedHijriCalendars } from '../types/interfaces'
 import { hwcToCompactString } from './utils'
 
 export class HWCRepresentation {
