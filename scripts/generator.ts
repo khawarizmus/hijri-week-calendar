@@ -1,5 +1,6 @@
 import process from 'node:process'
 import { Temporal } from '@js-temporal/polyfill'
+import ciDetect from '@npmcli/ci-detect'
 import ms from 'ms'
 import prettyBytes from 'pretty-bytes'
 import ora from 'ora'
@@ -25,6 +26,10 @@ console.log(kleur.green('Hijri Week Calendar Data Generator\n'))
 console.log(kleur.yellow('------------------------------------\n'))
 if (START_YEAR && END_YEAR)
   console.log(kleur.green(`Previously generated data from year ${kleur.yellow('AH ' + `${START_YEAR}`)} to ${kleur.yellow('AH ' + `${END_YEAR}`)} is available.`))
+
+const isGithubCI = ciDetect() === 'github-actions'
+if (isGithubCI)
+  prompts.inject([false, true, 1440, 1443])
 
 const useExisting = await prompts({
   type: (START_YEAR && END_YEAR) ? 'confirm' : null,

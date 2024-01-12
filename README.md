@@ -97,7 +97,7 @@ To run the tests, run the following command
 npm run test
 ```
 
-To run the test with tier user interface, run the following command (this will open a browser window and generate a coverage report as well)
+To run the test with a user interface, run the following command (this will open a browser window and generate a coverage report as well)
 
 ```bash
 npm run test:ui

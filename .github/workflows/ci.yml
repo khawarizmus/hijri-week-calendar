@@ -83,5 +83,7 @@ jobs:
       - name: Build
         run: nr build
 
+      - name: Generate Dates
+        run: nr date:generate
       - name: Test
         run: nr test
