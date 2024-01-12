@@ -28,9 +28,9 @@ if (START_YEAR && END_YEAR)
   console.log(kleur.green(`Previously generated data from year ${kleur.yellow('AH ' + `${START_YEAR}`)} to ${kleur.yellow('AH ' + `${END_YEAR}`)} is available.`))
 
 const isGithubCI = ciDetect() === 'github-actions'
-console.log('is CI', isGithubCI)
+
 if (isGithubCI)
-  prompts.inject([false, true, 1440, 1443])
+  prompts.inject([true, 1440, 1443])
 
 const useExisting = await prompts({
   type: (START_YEAR && END_YEAR) ? 'confirm' : null,
@@ -47,8 +47,6 @@ const doValidate = await prompts({
   message: 'Do You want to validate the generated data?',
 })
 
-console.log('existing', useExisting.value)
-console.log('validate', doValidate.value)
 if (!useExisting.value) {
   console.log('we will generate new data')
   await prompts({
@@ -75,9 +73,6 @@ if (!useExisting.value) {
     },
   })
 }
-
-console.log('START_YEAR', await storage.getItem<number>('START_YEAR'))
-console.log('END_YEAR', await storage.getItem<number>('END_YEAR'))
 
 export async function dataGenerator() {
   if (useExisting.value) {
