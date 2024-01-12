@@ -29,51 +29,61 @@ if (START_YEAR && END_YEAR)
 
 const isGithubCI = ciDetect() === 'github-actions'
 
-if (isGithubCI)
-  prompts.inject([true, 1440, 1443])
-
-const useExisting = await prompts({
-  type: (START_YEAR && END_YEAR) ? 'confirm' : null,
-  initial: !((START_YEAR && END_YEAR)), // if data is defined then useExisting should be true
-  name: 'value',
-  hint: kleur.yellow('Previously generated data will be overwritten.'),
-  message: 'Do You want to use the existing data?',
-})
-
-const doValidate = await prompts({
-  type: 'confirm',
-  initial: true,
-  name: 'value',
-  message: 'Do You want to validate the generated data?',
-})
-
-if (!useExisting.value) {
-  console.log('we will generate new data')
-  await prompts({
-    type: 'number',
-    initial: 1443,
-    name: 'value',
-    message: 'Enter the Hijri start year',
-    validate: (value: number) => value >= -99999 && value <= 999999,
-    onState: (state) => {
-      if (!state.aborted)
-        storage.setItem('START_YEAR', state.value)
-    },
-  })
-
-  await prompts({
-    type: 'number',
-    initial: 1444,
-    name: 'value',
-    message: 'Enter the Hijri end year',
-    validate: (value: number) => value >= -99999 && value <= 999999,
-    onState: (state) => {
-      if (!state.aborted)
-        storage.setItem('END_YEAR', state.value)
-    },
-  })
+let useExisting = {
+  value: false,
+}
+let doValidate = {
+  value: true,
 }
 
+if (!isGithubCI) {
+  useExisting = await prompts({
+    type: (START_YEAR && END_YEAR) ? 'confirm' : null,
+    initial: !((START_YEAR && END_YEAR)), // if data is defined then useExisting should be true
+    name: 'value',
+    hint: kleur.yellow('Previously generated data will be overwritten.'),
+    message: 'Do You want to use the existing data?',
+  })
+
+  doValidate = await prompts({
+    type: 'confirm',
+    initial: true,
+    name: 'value',
+    message: 'Do You want to validate the generated data?',
+  })
+
+  if (!useExisting.value) {
+    await prompts(
+      {
+        type: 'number',
+        initial: 1443,
+        name: 'value',
+        message: 'Enter the Hijri start year',
+        validate: (value: number) => value >= -99999 && value <= 999999,
+        onState: async (state) => {
+          if (!state.aborted)
+            await storage.setItem('START_YEAR', state.value)
+        },
+      },
+    )
+    await prompts({
+      type: 'number',
+      initial: 1444,
+      name: 'value',
+      message: 'Enter the Hijri end year',
+      validate: (value: number) => value >= -99999 && value <= 999999,
+      onState: async (state) => {
+        if (!state.aborted)
+          await storage.setItem('END_YEAR', state.value)
+      },
+    })
+  }
+}
+
+if (isGithubCI) {
+  await storage.setItem('START_YEAR', 1440)
+  await storage.setItem('END_YEAR', 1450)
+}
 export async function dataGenerator() {
   if (useExisting.value) {
     // return existing data
@@ -124,7 +134,7 @@ export async function dataGenerator() {
           }
         }
       }
-      storage.setItem(`dates:${calendar}`, data)
+      await storage.setItem(`dates:${calendar}`, data)
       switch (calendar) {
         case 'islamic-umalqura':
           umalqura.push(...data)
@@ -141,8 +151,8 @@ export async function dataGenerator() {
     const sizeInBytes = new Blob([JSON.stringify(umalqura)]).size + new Blob([JSON.stringify(civil)]).size + new Blob([JSON.stringify(tbla)]).size
     spinner.info(`List size approx = ${kleur.yellow(prettyBytes(sizeInBytes))}\n`)
     // store data
-    storage.setItem('START_YEAR', START_YEAR)
-    storage.setItem('END_YEAR', END_YEAR)
+    await storage.setItem('START_YEAR', START_YEAR)
+    await storage.setItem('END_YEAR', END_YEAR)
     console.timeEnd('DataGenerator Execution Time') // End timing and log the duration
     spinner.succeed(kleur.green(`Data generated successfully`))
     return {
