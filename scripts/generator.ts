@@ -28,12 +28,13 @@ if (START_YEAR && END_YEAR)
   console.log(kleur.green(`Previously generated data from year ${kleur.yellow('AH ' + `${START_YEAR}`)} to ${kleur.yellow('AH ' + `${END_YEAR}`)} is available.`))
 
 const isGithubCI = ciDetect() === 'github-actions'
+console.log('is CI', isGithubCI)
 if (isGithubCI)
   prompts.inject([false, true, 1440, 1443])
 
 const useExisting = await prompts({
   type: (START_YEAR && END_YEAR) ? 'confirm' : null,
-  initial: !((START_YEAR && END_YEAR)), // if data is undefined then useExisting is true
+  initial: !((START_YEAR && END_YEAR)), // if data is defined then useExisting should be true
   name: 'value',
   hint: kleur.yellow('Previously generated data will be overwritten.'),
   message: 'Do You want to use the existing data?',
@@ -46,7 +47,10 @@ const doValidate = await prompts({
   message: 'Do You want to validate the generated data?',
 })
 
+console.log('existing', useExisting.value)
+console.log('validate', doValidate.value)
 if (!useExisting.value) {
+  console.log('we will generate new data')
   await prompts({
     type: 'number',
     initial: 1443,
@@ -70,21 +74,10 @@ if (!useExisting.value) {
         storage.setItem('END_YEAR', state.value)
     },
   })
-
-  // await prompts({
-  //   type: 'autocomplete',
-  //   initial: 'islamic-umalqura',
-  //   name: 'value',
-  //   message: 'Select the which Hijri calendar',
-  //   choices: [
-  //     { title: 'islamic-umalqura', description: 'Umm al-Qura Astronomical calendar', value: 'islamic-umalqura' },
-  //     { title: 'islamic-civil', description: 'Tabular calendar based Friday epoch', value: 'islamic-civil' },
-  //     { title: 'islamic-tbla', description: 'Tabular calendar based on Thursday epoch', value: 'islamic-tbla' },
-  //     { title: 'islamic', description: 'Arithmetic calendar based on Gregorian', value: 'islamic', disabled: true },
-  //     { title: 'islamic-rgsa', description: 'Regional Sighting Saudi Arabia', value: 'islamic-rgsa', disabled: true },
-  //   ],
-  // })
 }
+
+console.log('START_YEAR', await storage.getItem<number>('START_YEAR'))
+console.log('END_YEAR', await storage.getItem<number>('END_YEAR'))
 
 export async function dataGenerator() {
   if (useExisting.value) {
