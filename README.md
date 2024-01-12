@@ -14,6 +14,21 @@ This implementation aims to standardise rules across all varieties of Hijri (isl
 
 The implementation is an extension of the [`Calendar`](https://github.com/js-temporal/temporal-polyfill/blob/a44a1bb61c738a504023427c486ab0a315c7b9d3/lib/calendar.ts#L129C14-L129C22) class from [`Temporal`](https://github.com/js-temporal/temporal-polyfill)
 
+## Usage
+
+```js
+import { HWCUmalqura } from 'hijri-week-calendar'
+
+const calendar = new HWCUmalqura()
+const HWCZonedDate = Temporal.ZonedDateTime.from({ year: 1444, month: 2, day: 3, timeZone: 'Asia/Riyadh', calendar: new HWCUmalqura() })
+
+// the calendar can be used directly
+console.log(customCalendar.HWCRepresentation(HWCZonedDate)) // { calendar: 'islamic-umalqura', dayOfWeek: 4, weekOfYear: 5, yearOfWeek: 1444, }
+
+// or it can be used as a calendar in the Temporal Objects that support a calendar
+console.log(HWCZonedDate.HWCRepresentation) // { calendar: 'islamic-umalqura', dayOfWeek: 4, weekOfYear: 5, yearOfWeek: 1444, }
+```
+
 # Rules
 
 The proposed rules (which follow the ISO week standards) are designed to be applicable to all types of Hijri (islamic) Calendars, not limited to just the tabular varieties. This includes compatibility with calendars such as the Umm al-Qura calendar. For more information on non-compatible calendars, see [Compatible Calendars](/#compatible-calendars) section.
